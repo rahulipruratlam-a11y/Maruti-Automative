@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MotoCare - Workshop Manager</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --bg: #f1f5f9;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --danger: #ef4444;
+      --success: #10b981;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      padding: 16px;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    header {
+      background: var(--card-bg);
+      padding: 16px 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      color: var(--primary);
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 8px;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    .view-panel {
+      display: none;
+    }
+
+    .view-panel.active {
+      display: block;
+    }
+
+    .grid-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .grid-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 8px;
+      padding: 20px;
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      font-size: 1.1rem;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text-muted);
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.95rem;
+      background: #fff;
+    }
+
+    input:focus, select:focus {
+      outline: 2px solid var(--primary);
+      border-color: transparent;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 18px;
+      border-radius: 6px;
+      border: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      width: 100%;
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .btn:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-secondary {
+      background: #64748b;
+    }
+
+    .btn-secondary:hover {
+      background: #475569;
+    }
+
+    .btn-sm {
+      padding: 4px 8px;
+      font-size: 0.8rem;
+      width: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      background: #f8fafc;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .badge-danger {
+      background: #fee2e2;
+      color: var(--danger);
+    }
+
+    .badge-success {
+      background: #dcfce7;
+      color: var(--success);
+    }
+
+    .item-select-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    /* Print Invoice Styles */
+    #print-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 999;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+    }
+
+    .invoice-card {
+      background: #fff;
+      padding: 30px;
+      width: 100%;
+      max-width: 500px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .invoice-header {
+      text-align: center;
+      border-bottom: 2px dashed #000;
+      padding-bottom: 12px;
+      margin-bottom: 12px;
+    }
+
+    .invoice-meta {
+      font-size: 0.85rem;
+      line-height: 1.4;
+      margin-bottom: 16px;
+    }
+
+    .invoice-table {
+      margin-bottom: 16px;
+    }
+
+    .invoice-total {
+      text-align: right;
+      font-size: 1.1rem;
+      font-weight: 700;
+      border-top: 2px dashed #000;
+      padding-top: 8px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #print-modal, #invoice-to-print, #invoice-to-print * {
+        visibility: visible;
+      }
+      #print-modal {
+        position: absolute;
+        inset: 0;
+        background: transparent;
+        padding: 0;
+      }
+      .modal-actions {
+        display: none !important;
+      }
+      .invoice-card {
+        box-shadow: none;
+        border: none;
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>🏍️ Two-Wheeler Workshop Hub</h1>
+    <nav class="nav-tabs">
+      <button class="tab-btn active" onclick="switchTab('jobs')">Job Cards</button>
+      <button class="tab-btn" onclick="switchTab('inventory')">Inventory</button>
+      <button class="tab-btn" onclick="switchTab('history')">History & Bills</button>
+    </nav>
+  </header>
+
+  <!-- Job Card Entry Tab -->
+  <section id="jobs-tab" class="view-panel active">
+    <div class="grid-layout">
+      <div class="card">
+        <h2>New Job Card Entry</h2>
+        <form id="job-card-form">
+          <div class="form-group">
+            <label for="cust-name">Customer Name</label>
+            <input type="text" id="cust-name" required placeholder="e.g. Rahul Sharma">
+          </div>
+          <div class="form-group">
+            <label for="cust-phone">Mobile Number</label>
+            <input type="tel" id="cust-phone" required placeholder="e.g. 9876543210">
+          </div>
+          <div class="form-group">
+            <label for="plate-no">Vehicle Plate Number</label>
+            <input type="text" id="plate-no" required placeholder="e.g. MP-09-AB-1234">
+          </div>
+          <div class="form-group">
+            <label for="labor-cost">Service / Labor Charges (₹)</label>
+            <input type="number" id="labor-cost" value="250" min="0" required>
+          </div>
+
+          <label>Add Spare Parts From Stock</label>
+          <div class="item-select-row">
+            <select id="part-select">
+              <!-- Dynamically Populated -->
+            </select>
+            <input type="number" id="part-qty" value="1" min="1" style="width: 70px;">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="addPartToJob()">Add</button>
+          </div>
+
+          <div class="form-group" style="margin-top: 10px;">
+            <label>Selected Parts:</label>
+            <ul id="selected-parts-list" style="list-style: none; font-size: 0.85rem; padding: 6px; background: #f8fafc; border-radius: 4px;">
+              <li style="color: var(--text-muted);">No parts added yet.</li>
+            </ul>
+          </div>
+
+          <button type="submit" class="btn">Create Job Card & Deduct Inventory</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>Quick Stock Snapshot</h2>
+        <table id="quick-stock-table">
+          <thead>
+            <tr>
+              <th>Part Name</th>
+              <th>Available</th>
+              <th>Price</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Populated dynamically -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Inventory Tab -->
+  <section id="inventory-tab" class="view-panel">
+    <div class="grid-layout">
+      <div class="card">
+        <h2>Add / Restock Part</h2>
+        <form id="inventory-form">
+          <div class="form-group">
+            <label for="inv-name">Part Name</label>
+            <input type="text" id="inv-name" required placeholder="e.g. Brake Shoe">
+          </div>
+          <div class="form-group">
+            <label for="inv-qty">Stock Quantity</label>
+            <input type="number" id="inv-qty" required min="1" value="10">
+          </div>
+          <div class="form-group">
+            <label for="inv-price">Selling Price per Unit (₹)</label>
+            <input type="number" id="inv-price" required min="1" value="180">
+          </div>
+          <button type="submit" class="btn">Save to Inventory</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>Warehouse Inventory</h2>
+        <table id="full-inventory-table">
+          <thead>
+            <tr>
+              <th>Part Name</th>
+              <th>In Stock</th>
+              <th>Unit Price</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Populated dynamically -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- History & Invoices Tab -->
+  <section id="history-tab" class="view-panel">
+    <div class="card">
+      <h2>Completed Service History</h2>
+      <table id="jobs-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Customer</th>
+            <th>Plate No</th>
+            <th>Phone</th>
+            <th>Grand Total</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Populated dynamically -->
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<!-- Invoice Modal -->
+<div id="print-modal">
+  <div class="invoice-card" id="invoice-to-print">
+    <div class="invoice-header">
+      <h3 style="margin-bottom: 4px;">MOTOCARE SERVICE CENTER</h3>
+      <p style="font-size: 0.8rem; color: #475569;">Service, Repair & Spare Parts</p>
+    </div>
+    <div class="invoice-meta" id="invoice-meta"></div>
+    <table class="invoice-table">
+      <thead>
+        <tr>
+          <th>Description</th>
+          <th style="text-align: right;">Qty</th>
+          <th style="text-align: right;">Amount</th>
+        </tr>
+      </thead>
+      <tbody id="invoice-items"></tbody>
+    </table>
+    <div class="invoice-total" id="invoice-total"></div>
+    <div class="modal-actions">
+      <button class="btn" onclick="window.print()">Print Bill</button>
+      <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Initial default inventory
+  const defaultInventory = [
+    { id: "1", name: "Engine Oil 4T (1L)", stock: 15, price: 380 },
+    { id: "2", name: "Brake Shoes (Pair)", stock: 8, price: 220 },
+    { id: "3", name: "Spark Plug (Standard)", stock: 20, price: 120 }
+  ];
+
+  let inventory = JSON.parse(localStorage.getItem('moto_inventory')) || defaultInventory;
+  let jobCards = JSON.parse(localStorage.getItem('moto_jobs')) || [];
+  let currentJobParts = [];
+
+  function saveStorage() {
+    localStorage.setItem('moto_inventory', JSON.stringify(inventory));
+    localStorage.setItem('moto_jobs', JSON.stringify(jobCards));
+  }
+
+  function switchTab(tabId) {
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
+    
+    event.target.classList.add('active');
+    document.getElementById(tabId + '-tab').classList.add('active');
+    render();
+  }
+
+  function render() {
+    // Populate Dropdown
+    const partSelect = document.getElementById('part-select');
+    partSelect.innerHTML = inventory.map(item => `
+      <option value="${item.id}" ${item.stock <= 0 ? 'disabled' : ''}>
+        ${item.name} (${item.stock} left) - ₹${item.price}
+      </option>
+    `).join('');
+
+    // Populate Snapshot Table
+    const quickTbody = document.querySelector('#quick-stock-table tbody');
+    quickTbody.innerHTML = inventory.map(item => `
+      <tr>
+        <td>${item.name}</td>
+        <td><span class="badge ${item.stock <= 3 ? 'badge-danger' : 'badge-success'}">${item.stock}</span></td>
+        <td>₹${item.price}</td>
+      </tr>
+    `).join('');
+
+    // Populate Full Inventory Table
+    const fullTbody = document.querySelector('#full-inventory-table tbody');
+    fullTbody.innerHTML = inventory.map(item => `
+      <tr>
+        <td>${item.name}</td>
+        <td>${item.stock}</td>
+        <td>₹${item.price}</td>
+        <td><span class="badge ${item.stock <= 3 ? 'badge-danger' : 'badge-success'}">${item.stock <= 3 ? 'Low Stock' : 'In Stock'}</span></td>
+      </tr>
+    `).join('');
+
+    // Populate History Table
+    const jobsTbody = document.querySelector('#jobs-table tbody');
+    jobsTbody.innerHTML = jobCards.length ? jobCards.slice().reverse().map(job => `
+      <tr>
+        <td>${job.date}</td>
+        <td>${job.customer}</td>
+        <td>${job.plate}</td>
+        <td>${job.phone}</td>
+        <td>₹${job.grandTotal}</td>
+        <td><button class="btn btn-secondary btn-sm" onclick="showInvoice('${job.id}')">View Bill</button></td>
+      </tr>
+    `).join('') : '<tr><td colspan="6" style="text-align:center;">No jobs recorded yet.</td></tr>';
+  }
+
+  function addPartToJob() {
+    const partId = document.getElementById('part-select').value;
+    const qty = parseInt(document.getElementById('part-qty').value, 10);
+    const item = inventory.find(i => i.id === partId);
+
+    if (!item) return;
+
+    if (qty > item.stock) {
+      alert(`Only ${item.stock} units available in stock.`);
+      return;
+    }
+
+    const existing = currentJobParts.find(p => p.id === partId);
+    if (existing) {
+      if (existing.qty + qty > item.stock) {
+        alert(`Cannot add more than existing stock (${item.stock}).`);
+        return;
+      }
+      existing.qty += qty;
+    } else {
+      currentJobParts.push({ id: item.id, name: item.name, price: item.price, qty: qty });
+    }
+
+    renderSelectedParts();
+  }
+
+  function renderSelectedParts() {
+    const list = document.getElementById('selected-parts-list');
+    if (currentJobParts.length === 0) {
+      list.innerHTML = '<li style="color: var(--text-muted);">No parts added yet.</li>';
+      return;
+    }
+    list.innerHTML = currentJobParts.map((p, idx) => `
+      <li style="display:flex; justify-content:space-between; margin-bottom: 4px;">
+        <span>${p.name} (x${p.qty}) - ₹${p.price * p.qty}</span>
+        <button type="button" onclick="removeJobPart(${idx})" style="color:var(--danger); border:none; background:none; cursor:pointer;">✕</button>
+      </li>
+    `).join('');
+  }
+
+  function removeJobPart(index) {
+    currentJobParts.splice(index, 1);
+    renderSelectedParts();
+  }
+
+  // Handle New Job Card Submission
+  document.getElementById('job-card-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const labor = parseFloat(document.getElementById('labor-cost').value) || 0;
+    const partsTotal = currentJobParts.reduce((acc, p) => acc + (p.price * p.qty), 0);
+    const grandTotal = labor + partsTotal;
+
+    // Deduct stock
+    currentJobParts.forEach(part => {
+      const target = inventory.find(i => i.id === part.id);
+      if (target) target.stock -= part.qty;
+    });
+
+    const newJob = {
+      id: 'JOB-' + Date.now().toString().slice(-6),
+      date: new Date().toLocaleDateString(),
+      customer: document.getElementById('cust-name').value,
+      phone: document.getElementById('cust-phone').value,
+      plate: document.getElementById('plate-no').value.toUpperCase(),
+      labor: labor,
+      parts: [...currentJobParts],
+      grandTotal: grandTotal
+    };
+
+    jobCards.push(newJob);
+    saveStorage();
+
+    // Reset Form
+    this.reset();
+    currentJobParts = [];
+    renderSelectedParts();
+    render();
+
+    // Show Printable Invoice
+    showInvoice(newJob.id);
+  });
+
+  // Handle New Inventory Submission
+  document.getElementById('inventory-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const name = document.getElementById('inv-name').value.trim();
+    const qty = parseInt(document.getElementById('inv-qty').value, 10);
+    const price = parseFloat(document.getElementById('inv-price').value);
+
+    const existing = inventory.find(i => i.name.toLowerCase() === name.toLowerCase());
+    if (existing) {
+      existing.stock += qty;
+      existing.price = price;
+    } else {
+      inventory.push({ id: Date.now().toString(), name, stock: qty, price });
+    }
+
+    saveStorage();
+    this.reset();
+    render();
+    alert('Inventory updated successfully.');
+  });
+
+  function showInvoice(jobId) {
+    const job = jobCards.find(j => j.id === jobId);
+    if (!job) return;
+
+    document.getElementById('invoice-meta').innerHTML = `
+      <strong>Invoice No:</strong> ${job.id}<br>
+      <strong>Date:</strong> ${job.date}<br>
+      <strong>Customer:</strong> ${job.customer} (${job.phone})<br>
+      <strong>Vehicle No:</strong> ${job.plate}
+    `;
+
+    let itemsHtml = `
+      <tr>
+        <td>Labor & Service Charge</td>
+        <td style="text-align: right;">1</td>
+        <td style="text-align: right;">₹${job.labor}</td>
+      </tr>
+    `;
+
+    job.parts.forEach(p => {
+      itemsHtml += `
+        <tr>
+          <td>${p.name}</td>
+          <td style="text-align: right;">${p.qty}</td>
+          <td style="text-align: right;">₹${p.price * p.qty}</td>
+        </tr>
+      `;
+    });
+
+    document.getElementById('invoice-items').innerHTML = itemsHtml;
+    document.getElementById('invoice-total').innerText = `Total: ₹${job.grandTotal}`;
+    document.getElementById('print-modal').style.display = 'flex';
+  }
+
+  function closeModal() {
+    document.getElementById('print-modal').style.display = 'none';
+  }
+
+  // Initial load
+  render();
+</script>
+</body>
+</html>
